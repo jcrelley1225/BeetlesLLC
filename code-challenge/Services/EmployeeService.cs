@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using challenge.Models;
 using Microsoft.Extensions.Logging;
@@ -40,7 +41,17 @@ namespace challenge.Services
             return null;
         }
 
-        public Employee Replace(Employee originalEmployee, Employee newEmployee)
+		public async Task<ReportingStructure> GetReportingStructureForEmployee(string id, CancellationToken cancellationToken)
+		{
+			if( !String.IsNullOrEmpty(id) )
+			{
+				return await _employeeRepository.GetReportingStructureForEmployee(id, cancellationToken);
+			}
+
+			return null;
+		}
+
+		public Employee Replace(Employee originalEmployee, Employee newEmployee)
         {
             if(originalEmployee != null)
             {

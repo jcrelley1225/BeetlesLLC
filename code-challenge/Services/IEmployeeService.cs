@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace challenge.Services
@@ -9,7 +10,8 @@ namespace challenge.Services
     public interface IEmployeeService
     {
         Employee GetById(String id);
-        Employee Create(Employee employee);
+		Task<ReportingStructure> GetReportingStructureForEmployee(string id, CancellationToken cancellationToken);
+		Employee Create(Employee employee);
         Employee Replace(Employee originalEmployee, Employee newEmployee);
     }
 }

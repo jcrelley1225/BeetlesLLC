@@ -89,7 +89,38 @@ namespace code_challenge.Tests.Integration
             Assert.AreEqual(expectedLastName, employee.LastName);
         }
 
-        [TestMethod]
+		[TestMethod]
+		public void GetReportingStructureByEmployeeById_Returns_NotFound()
+		{
+			string employeeId = "Invalid_Id";
+			// Execute
+			var getRequestTask = _httpClient.GetAsync($"api/employee/{employeeId}/reportingStructure");
+			var response = getRequestTask.Result;
+
+			// Assert
+			Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+		}
+
+		[TestMethod]
+		[DataRow("16a596ae-edd3-4847-99fe-c4518e82c86f", "John Lennon", 4)]
+		[DataRow("b7839309-3348-463b-a7e3-5de1c168beb3", "Paul McCartney", 0)]
+		[DataRow("03aa1462-ffa9-4978-901b-7c001562cf6f", "Ringo Starr", 2)]
+		[DataRow("62c1084e-6e34-4630-93fd-9153afb65309", "Pete Best", 0)]
+		[DataRow("c0c2293d-16bd-4603-8e08-638a9d18b22c", "George Harrison", 0)]
+		public void GetReportingStructureByEmployeeById_Returns_Ok(string employeeId, string expectedEmployee, int expectedNumberOfReports)
+		{
+			// Execute
+			var getRequestTask = _httpClient.GetAsync($"api/employee/{employeeId}/reportingStructure");
+			var response = getRequestTask.Result;
+
+			// Assert
+			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+			var reportingStructure = response.DeserializeContent<ReportingStructure>();
+			Assert.AreEqual(expectedEmployee, reportingStructure.Employee);
+			Assert.AreEqual(expectedNumberOfReports, reportingStructure.NumberOfReports);
+		}
+
+		[TestMethod]
         public void UpdateEmployee_Returns_Ok()
         {
             // Arrange

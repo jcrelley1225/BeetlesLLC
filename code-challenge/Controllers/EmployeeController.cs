@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using challenge.Services;
 using challenge.Models;
+using System.Threading;
 
 namespace challenge.Controllers
 {
@@ -44,18 +45,31 @@ namespace challenge.Controllers
             return Ok(employee);
         }
 
-        [HttpPut("{id}")]
-        public IActionResult ReplaceEmployee(String id, [FromBody]Employee newEmployee)
-        {
-            _logger.LogDebug($"Recieved employee update request for '{id}'");
+		[HttpGet("{id}/reportingStructure", Name = "getReportingStructureByEmployeeById")]
+		public async Task<IActionResult> GetReportingStructureByEmployeeById(String id, CancellationToken cancellationToken)
+		{
+			_logger.LogDebug($"Received employee reporting structure request request for '{id}'");
 
-            var existingEmployee = _employeeService.GetById(id);
-            if (existingEmployee == null)
-                return NotFound();
+			ReportingStructure reportingStructure = await _employeeService.GetReportingStructureForEmployee(id, cancellationToken);
 
-            _employeeService.Replace(existingEmployee, newEmployee);
+			if( reportingStructure == null )
+				return NotFound();
 
-            return Ok(newEmployee);
-        }
-    }
+			return Ok(reportingStructure);
+		}
+
+		[HttpPut("{id}")]
+		public IActionResult ReplaceEmployee(String id, [FromBody]Employee newEmployee)
+		{
+			_logger.LogDebug($"Recieved employee update request for '{id}'");
+
+			var existingEmployee = _employeeService.GetById(id);
+			if (existingEmployee == null)
+				return NotFound();
+
+			_employeeService.Replace(existingEmployee, newEmployee);
+
+			return Ok(newEmployee);
+		}
+	}
 }
