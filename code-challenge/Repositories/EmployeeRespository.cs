@@ -28,10 +28,30 @@ namespace challenge.Repositories
             return employee;
         }
 
-        public Employee GetById(string id)
+        public Employee GetById(string id, bool includeCompensation)
         {
-            return _employeeContext.Employees.SingleOrDefault(e => e.EmployeeId == id);
+			var query = _employeeContext.Employees.AsQueryable();
+
+			if( includeCompensation )
+			{
+				query = query.Include(e => e.Compensation);
+			}
+
+			return query.SingleOrDefault(e => e.EmployeeId == id);
         }
+
+		public async Task<CompensationResponse> GetCompensationById(string id, CancellationToken cancellationToken)
+		{
+			return await _employeeContext.Employees
+					.Where(e => e.EmployeeId == id && e.Compensation != null)
+					.Select(e => new CompensationResponse()
+					{
+						Employee		= $"{e.FirstName} {e.LastName}",
+						EffectiveDate	= e.Compensation.EffectiveDate,
+						Salary			= e.Compensation.Salary
+					})
+					.SingleOrDefaultAsync(cancellationToken);
+		}
 
 		public async Task<ReportingStructure> GetReportingStructureForEmployee(string id, CancellationToken cancellationToken)
 		{
@@ -68,7 +88,12 @@ namespace challenge.Repositories
             return _employeeContext.SaveChangesAsync();
         }
 
-        public Employee Remove(Employee employee)
+		public async Task<int> SaveAsync(CancellationToken cancellationToken)
+		{
+			return await _employeeContext.SaveChangesAsync(cancellationToken);
+		}
+
+		public Employee Remove(Employee employee)
         {
             return _employeeContext.Remove(employee).Entity;
         }

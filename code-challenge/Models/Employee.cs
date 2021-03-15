@@ -13,5 +13,6 @@ namespace challenge.Models
         public String Position { get; set; }
         public String Department { get; set; }
         public List<Employee> DirectReports { get; set; }
+		public Compensation Compensation { get; set; }
     }
 }

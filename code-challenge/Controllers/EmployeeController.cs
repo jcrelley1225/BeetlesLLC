@@ -37,7 +37,7 @@ namespace challenge.Controllers
         {
             _logger.LogDebug($"Received employee get request for '{id}'");
 
-            var employee = _employeeService.GetById(id);
+            var employee = _employeeService.GetById(id, false);
 
             if (employee == null)
                 return NotFound();
@@ -63,13 +63,56 @@ namespace challenge.Controllers
 		{
 			_logger.LogDebug($"Recieved employee update request for '{id}'");
 
-			var existingEmployee = _employeeService.GetById(id);
+			var existingEmployee = _employeeService.GetById(id, false);
 			if (existingEmployee == null)
 				return NotFound();
 
 			_employeeService.Replace(existingEmployee, newEmployee);
 
 			return Ok(newEmployee);
+		}
+
+		[HttpGet("{id}/compensation", Name = "getEmployeeCompensation")]
+		public async Task<IActionResult> CreateCompensation(String id, CancellationToken cancellationToken)
+		{
+			_logger.LogDebug($"Received employee get compensation request for id '{id}'");
+
+			var compensation = await _employeeService.GetCompensationById(id, cancellationToken);
+
+			if( compensation == null )
+			{
+				return NotFound();
+			}
+
+			return Ok(compensation);
+		}
+
+		[HttpPut("{id}/compensation", Name = "createEmployeeCompensation")]
+		public async Task<IActionResult> CreateCompensation(String id, [FromBody] Compensation compensation, CancellationToken cancellationToken)
+		{
+			_logger.LogDebug($"Received employee create compensation request for id '{id}'");
+
+			if( compensation == null )
+			{
+				ModelState.AddModelError("", "Compensation was not specified in the request");
+			}
+
+			if( !ModelState.IsValid )
+			{
+				return BadRequest(ModelState);
+			}
+
+
+			var employee = _employeeService.GetById(id, true);
+
+			if( employee == null )
+			{
+				return NotFound();
+			}
+
+			CompensationResponse compensationResponse = await _employeeService.ReplaceCompensation(employee, compensation, cancellationToken);
+
+			return Ok(compensationResponse);
 		}
 	}
 }

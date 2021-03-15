@@ -31,11 +31,21 @@ namespace challenge.Services
             return employee;
         }
 
-        public Employee GetById(string id)
+		public async Task<CompensationResponse> GetCompensationById(string id, CancellationToken cancellationToken)
+		{
+			if( !String.IsNullOrEmpty(id) )
+			{
+				return await _employeeRepository.GetCompensationById(id, cancellationToken);
+			}
+
+			return null;
+		}
+
+		public Employee GetById(string id, bool includeCompensation)
         {
             if(!String.IsNullOrEmpty(id))
             {
-                return _employeeRepository.GetById(id);
+                return _employeeRepository.GetById(id, includeCompensation);
             }
 
             return null;
@@ -70,5 +80,20 @@ namespace challenge.Services
 
             return newEmployee;
         }
+
+		public async Task<CompensationResponse> ReplaceCompensation(Employee employee, Compensation compensation, CancellationToken cancellationToken)
+		{
+			if( employee.Compensation == null )
+			{
+				employee.Compensation = new Compensation();
+			}
+
+			employee.Compensation.EffectiveDate = compensation.EffectiveDate;
+			employee.Compensation.Salary        = compensation.Salary;
+
+			await _employeeRepository.SaveAsync(cancellationToken);
+
+			return await GetCompensationById(employee.EmployeeId, cancellationToken);
+		}
     }
 }

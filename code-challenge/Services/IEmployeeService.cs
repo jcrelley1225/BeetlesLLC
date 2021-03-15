@@ -9,9 +9,12 @@ namespace challenge.Services
 {
     public interface IEmployeeService
     {
-        Employee GetById(String id);
+        Employee GetById(String id, bool loadCompensation);
+		Task<CompensationResponse> GetCompensationById(string id, CancellationToken cancellationToken);
 		Task<ReportingStructure> GetReportingStructureForEmployee(string id, CancellationToken cancellationToken);
 		Employee Create(Employee employee);
         Employee Replace(Employee originalEmployee, Employee newEmployee);
-    }
+		Task<CompensationResponse> ReplaceCompensation(Employee employee, Compensation compensation, CancellationToken cancellationToken);
+
+	}
 }
